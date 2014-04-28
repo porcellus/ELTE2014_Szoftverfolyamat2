@@ -1,8 +1,9 @@
 package com.eltecalendar;
 
-public class Teacher {
+public class Programme {
 	public String name;
 	public String department;
-	public String rank;
-	public String email;
+	public int term;
+	public String courseType;
+	
 }
