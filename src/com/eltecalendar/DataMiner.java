@@ -5,19 +5,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-
+import java.util.ArrayList;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class DataMiner {
 
 	DatabaseHelper db;
+	ArrayList<String> mainList;
 
 	public DataMiner(DatabaseHelper dbh) {
 		db = dbh;
-		Log.d("sajt", "abrakadabra");
-		System.out.println("cica");
-		System.err.println("mica");
 	}
 
 	public void getNewDatabase() {
@@ -26,8 +23,8 @@ public class DataMiner {
 
 		// db.addCourse();
 		
-		String address = "http://ttkto.elte.hu/scripts/tanrende/";
-		address += "kurznevalapjan.idc?tanevfelev=2013-2014-2&kurz=";
+		String baseAddress = "http://ttkto.elte.hu/scripts/tanrende/";
+		String address = baseAddress + "kurznevalapjan.idc?tanevfelev=2013-2014-2&kurz=";
 
 		HttpFetch hf = new HttpFetch();
 		hf.execute(address);
@@ -36,21 +33,44 @@ public class DataMiner {
 			hf.getException().printStackTrace();
 			System.exit(-1);
 		}
+		
+		try {
+			mainList = hf.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		// first <tr> skip
+		for (int i = 1; i + 8 < mainList.size(); i += 9) {
+			// link to details
+			String tmp = mainList.get(i+1);
+			
+			// course id
+			tmp = mainList.get(i+2);
+			
+			// course name
+			tmp = mainList.get(i+3);
+			
+			// link to rest of details
+			tmp = mainList.get(i+8);
+			
+		}
 	}
 
 	public void updateDatabase() {
-
 		// db.updateCourse();
-
 	}
 }
 
-class HttpFetch extends AsyncTask<String, Void, Void> {
+class HttpFetch extends AsyncTask<String, Void, ArrayList<String>> {
 
-	private Exception exception;
+	Exception exception;
+	
+	ArrayList<String> data = new ArrayList<String>();
 
 	@Override
-	protected Void doInBackground(String... params) {
+	protected ArrayList<String> doInBackground(String... params) {
 		exception = null;
 		try {
 			URL url = new URL(params[0]);
@@ -59,9 +79,11 @@ class HttpFetch extends AsyncTask<String, Void, Void> {
 			try {
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						httpConnection.getInputStream(), Charset.forName("ISO-8859-1")));
-				for (int i = 0; i < 55; ++i) {
-					String data = br.readLine();
-					Log.i("site", data);
+				String line;
+				while ((line = br.readLine()) != null) {
+					if (line.startsWith("<tr>") || line.startsWith("<td")) {
+						data.add(line);
+					}
 				}
 				br.close();
 			} catch (Exception e) {
@@ -73,7 +95,7 @@ class HttpFetch extends AsyncTask<String, Void, Void> {
 			exception = e;
 		}
 
-		return null;
+		return data;
 	}
 
 	public Exception getException() {
