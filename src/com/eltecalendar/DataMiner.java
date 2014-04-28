@@ -6,13 +6,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+
 import android.os.AsyncTask;
 
 public class DataMiner {
 
 	DatabaseHelper db;
-	ArrayList<String> mainList;
-
+	ArrayList<String> mainList, detailList;
+	
 	public DataMiner(DatabaseHelper dbh) {
 		db = dbh;
 	}
@@ -42,19 +43,133 @@ public class DataMiner {
 		}
 
 		// first <tr> skip
-		for (int i = 1; i + 8 < mainList.size(); i += 9) {
-			// link to details
-			String tmp = mainList.get(i+1);
+		for (int i = 1; i + 8 < mainList.size() && i < 50; i += 9) {
+			Course c = new Course();
+			Subject s = new Subject();
+			c.subject = s; 
 			
+			// link to details
+			String tmp = mainList.get(i+1).split("\"")[1];
+			
+			address = baseAddress + tmp;
+			hf = new HttpFetch();
+			hf.execute(address);
+		
+			if (hf.getException() != null) {
+				hf.getException().printStackTrace();
+				System.exit(-1);
+			}
+			
+			try {
+				detailList = hf.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			
+			if (detailList.size() > 1) {
+				for (int j = 1; j + 16 < detailList.size(); j += 17) {
+					Occasion o = new Occasion();
+					Teacher t = new Teacher();
+					/*
+					// class type
+					tmp = detailList.get(j+1).split(">")[1].split("<")[0];
+					c.classType = tmp;
+					
+					// group number
+					tmp = detailList.get(j+2).split(">")[1].split("<")[0];
+					c.courseNumber = Integer.parseInt(tmp);
+					
+					// day
+					tmp = detailList.get(j+4).split(">")[1].split("<")[0];
+					char ch = tmp.charAt(0);
+					switch (ch) {
+					case 'H': o.onDay = Occasion.Day.MONDAY;
+						break;
+					case 'K': o.onDay = Occasion.Day.TUESDAY;
+						break;
+					case 'S': o.onDay = Occasion.Day.WEDNESDAY;
+						break;
+					case 'C': o.onDay = Occasion.Day.THURSDAY;
+						break;
+					case 'P': o.onDay = Occasion.Day.FRIDAY;
+						break;
+					}
+					
+					// start time
+					tmp = detailList.get(j+5).split(">")[1].split("<")[0];
+					if (tmp != null) {
+						o.startTimeHour = Integer.parseInt(tmp.split(":")[0]);
+						o.startTimeMinute = Integer.parseInt(tmp.split(":")[1]);
+					}
+										
+					// end time
+					tmp = detailList.get(j+6).split(">")[1].split("<")[0];
+					if (tmp != null) {
+						o.endTimeHour = Integer.parseInt(tmp.split(":")[0]);
+						o.endTimeMinute = Integer.parseInt(tmp.split(":")[1]);
+					}
+					
+					// building
+					tmp = detailList.get(j+7).split(">")[1].split("<")[0];
+					o.building = tmp;
+					
+					// room
+					tmp = detailList.get(j+8).split(">")[1].split("<")[0];
+					o.room = tmp;
+					
+					// teacher name
+					tmp = detailList.get(j+9).split(">")[1].split("<")[0];
+					t.name = tmp;
+					
+					// teacher department
+					tmp = detailList.get(j+10).split(">")[1].split("<")[0];
+					t.department = tmp;
+					
+					// teacher rank
+					tmp = detailList.get(j+11).split(">")[1].split("<")[0];
+					t.rank = tmp;
+					
+					// teacher email
+					tmp = detailList.get(j+12).split(">")[1].split("<")[0];
+					t.email = tmp;
+					
+					*/
+					// TODO kezdeni valamit occasionnel és teacherrel
+				}
+			}
+
 			// course id
-			tmp = mainList.get(i+2);
+			tmp = mainList.get(i+2).replace(" ", "");
+			tmp = tmp.substring(4, tmp.length() - 5);
+			s.code = tmp;
 			
 			// course name
-			tmp = mainList.get(i+3);
+			tmp = mainList.get(i+3).split(">")[2].split("<")[0];
+			s.name = tmp;
 			
 			// link to rest of details
-			tmp = mainList.get(i+8);
+			tmp = mainList.get(i+8).split("\"")[1];
 			
+			address = baseAddress + tmp;
+			hf = new HttpFetch();
+			hf.execute(address);
+		
+			if (hf.getException() != null) {
+				hf.getException().printStackTrace();
+				System.exit(-1);
+			}
+			
+			try {
+				detailList = hf.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			
+			if (detailList.size() > 1) {
+				
+			}
 		}
 	}
 
