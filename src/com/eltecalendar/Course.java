@@ -6,4 +6,5 @@ public class Course {
 	public String classType;
 	
 	public int Id;
+	public Teacher teacher;
 }
