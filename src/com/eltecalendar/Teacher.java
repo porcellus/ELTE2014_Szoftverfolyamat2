@@ -5,4 +5,6 @@ public class Teacher {
 	public String department;
 	public String rank;
 	public String email;
+	
+	public int Id;
 }
