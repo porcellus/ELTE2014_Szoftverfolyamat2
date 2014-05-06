@@ -5,5 +5,6 @@ public class Subject {
 	public String name;
 	
 	public int Id;
-	public int term;
+	// TODO
+	public int term; // ez itt nem értelmezhetõ
 }
