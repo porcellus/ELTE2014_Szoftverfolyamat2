@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 import android.os.AsyncTask;
+import android.text.Html;
 
 public class DataMiner {
 
@@ -71,82 +72,73 @@ public class DataMiner {
 				for (int j = 1; j + 16 < detailList.size(); j += 17) {
 					Occasion o = new Occasion();
 					Teacher t = new Teacher();
-					/*
+
 					// class type
-					tmp = detailList.get(j+1).split(">")[1].split("<")[0];
-					c.classType = tmp;
+					c.classType = stripHtml(detailList.get(j+1));
 					
 					// group number
-					tmp = detailList.get(j+2).split(">")[1].split("<")[0];
+					tmp = stripHtml(detailList.get(j+2));
 					c.courseNumber = Integer.parseInt(tmp);
 					
 					// day
-					tmp = detailList.get(j+4).split(">")[1].split("<")[0];
-					char ch = tmp.charAt(0);
-					switch (ch) {
-					case 'H': o.onDay = Occasion.Day.MONDAY;
-						break;
-					case 'K': o.onDay = Occasion.Day.TUESDAY;
-						break;
-					case 'S': o.onDay = Occasion.Day.WEDNESDAY;
-						break;
-					case 'C': o.onDay = Occasion.Day.THURSDAY;
-						break;
-					case 'P': o.onDay = Occasion.Day.FRIDAY;
-						break;
+					tmp = stripHtml(detailList.get(j+4));
+					if (tmp.length() > 0) {
+						char ch = tmp.charAt(0);
+						switch (ch) {
+						case 'H': o.onDay = Occasion.Day.MONDAY;
+							break;
+						case 'K': o.onDay = Occasion.Day.TUESDAY;
+							break;
+						case 'S': o.onDay = Occasion.Day.WEDNESDAY;
+							break;
+						case 'C': o.onDay = Occasion.Day.THURSDAY;
+							break;
+						case 'P': o.onDay = Occasion.Day.FRIDAY;
+							break;
+						}
 					}
 					
 					// start time
-					tmp = detailList.get(j+5).split(">")[1].split("<")[0];
-					if (tmp != null) {
+					tmp = stripHtml(detailList.get(j+5));
+					if (tmp.length() > 0) {
 						o.startTimeHour = Integer.parseInt(tmp.split(":")[0]);
 						o.startTimeMinute = Integer.parseInt(tmp.split(":")[1]);
 					}
 										
 					// end time
-					tmp = detailList.get(j+6).split(">")[1].split("<")[0];
-					if (tmp != null) {
+					tmp = stripHtml(detailList.get(j+6));
+					if (tmp.length() > 0) {
 						o.endTimeHour = Integer.parseInt(tmp.split(":")[0]);
 						o.endTimeMinute = Integer.parseInt(tmp.split(":")[1]);
 					}
 					
 					// building
-					tmp = detailList.get(j+7).split(">")[1].split("<")[0];
-					o.building = tmp;
+					o.building = stripHtml(detailList.get(j+7));
 					
 					// room
-					tmp = detailList.get(j+8).split(">")[1].split("<")[0];
-					o.room = tmp;
+					o.room = stripHtml(detailList.get(j+8));
 					
 					// teacher name
-					tmp = detailList.get(j+9).split(">")[1].split("<")[0];
-					t.name = tmp;
+					t.name = stripHtml(detailList.get(j+9));
 					
 					// teacher department
-					tmp = detailList.get(j+10).split(">")[1].split("<")[0];
-					t.department = tmp;
+					t.department = stripHtml(detailList.get(j+10));
 					
 					// teacher rank
-					tmp = detailList.get(j+11).split(">")[1].split("<")[0];
-					t.rank = tmp;
+					t.rank = stripHtml(detailList.get(j+11));
 					
 					// teacher email
-					tmp = detailList.get(j+12).split(">")[1].split("<")[0];
-					t.email = tmp;
+					t.email = stripHtml(detailList.get(j+12));
 					
-					*/
 					// TODO kezdeni valamit occasionnel és teacherrel
 				}
 			}
 
 			// course id
-			tmp = mainList.get(i+2).replace(" ", "");
-			tmp = tmp.substring(4, tmp.length() - 5);
-			s.code = tmp;
+			s.code = stripHtml(mainList.get(i+2));
 			
 			// course name
-			tmp = mainList.get(i+3).split(">")[2].split("<")[0];
-			s.name = tmp;
+			s.name = stripHtml(mainList.get(i+3));
 			
 			// link to rest of details
 			tmp = mainList.get(i+8).split("\"")[1];
@@ -168,13 +160,18 @@ public class DataMiner {
 			}
 			
 			if (detailList.size() > 1) {
-				
+				// TODO feldolgozni
 			}
 		}
 	}
 
 	public void updateDatabase() {
+		// TODO
 		// db.updateCourse();
+	}
+	
+	String stripHtml(String html) {
+		return Html.fromHtml(html).toString();
 	}
 }
 
