@@ -160,7 +160,24 @@ public class DataMiner {
 			}
 			
 			if (detailList.size() > 1) {
-				// TODO feldolgozni
+				for (int j = 1; j + 5 < detailList.size(); j += 6) {
+					Programme p = new Programme();
+					
+					// programme name
+					p.name = stripHtml(detailList.get(j+1));
+					
+					// department (full time, part time, correspondence)
+					p.department = stripHtml(detailList.get(j+2));
+					
+					// term
+					tmp = stripHtml(detailList.get(j+4));
+					p.term = Integer.parseInt(tmp);
+					
+					// type
+					p.courseType = stripHtml(detailList.get(j+5));
+					
+					//TODO kezdeni valamit a szakkal
+				}
 			}
 		}
 	}
