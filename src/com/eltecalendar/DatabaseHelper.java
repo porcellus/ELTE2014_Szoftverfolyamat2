@@ -63,14 +63,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public Course getCourse(Subject subject, int number)
 	{
 		int sId = subject.Id;
-		Course course = new Course();
+		
 		Cursor row = this.getReadableDatabase().query("Courses", null, "SubjectId = ? and CourseNumber = ?", new String[] {Integer.toString(sId), Integer.toString(number)}, null, null, null);
 		
 		row.moveToNext();
-		course.courseNumber = row.getInt(2);
-		course.teacher = getTeacher(row.getInt(3));
+		Course course = new Course();
 		course.subject = subject;
-		
+		course.teacher = getTeacher(row.getInt(3));
+		course.courseNumber = row.getInt(2);
+		course.Id = row.getInt(0);
 		
 		return course;
 	}
@@ -89,6 +90,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			Subject subject = new Subject();
 			subject.name = rows.getString(1);
 			subject.code = rows.getString(2);
+			subject.Id = rows.getInt(0);
 			subjects.add(subject);
 		}
 		
@@ -104,10 +106,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		while (rows.moveToNext())
 		{
 			Course course = new Course();
-			course.courseNumber = rows.getInt(2);
 			course.subject = subject;
 			course.teacher = getTeacher(rows.getInt(3));
+			course.courseNumber = rows.getInt(1);
+			course.Id = rows.getInt(0);
 			courses.add(course);
+			
+			Cursor timeRows = this.getReadableDatabase().rawQuery("select * from TimePlace where CourseId = ?", new String[] {Integer.toString(course.Id)});
+			while (timeRows.moveToNext())
+			{
+				
+			}
 		}
 		
 		return courses;
@@ -115,12 +124,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	
 	public Teacher getTeacher(int Id)
 	{
-		Teacher teacher = new Teacher();
 		
 		Cursor row = this.getReadableDatabase().rawQuery("select * from Teachers where Id=?", new String[] {Integer.toString(Id)});
 		row.moveToNext();
-		teacher.Id = row.getInt(0);
+		Teacher teacher = new Teacher();
 		teacher.name = row.getString(1);
+		teacher.Id = row.getInt(0);
 		
 		return teacher;
 	}
@@ -143,6 +152,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		values.put("TeacherId", course.teacher.Id);
 		
 		course.Id = (int)this.getWritableDatabase().insert("Courses", null, values);
+		
+		for (Occasion i : course.timetable)
+		{
+			ContentValues occassion = new ContentValues();
+			StringBuilder time = new StringBuilder();
+			time.append(i.startTimeHour);
+			time.append(":");
+			time.append(i.startTimeMinute);
+			occassion.put("CourseId", course.Id);
+			occassion.put("Begin", time.toString());
+			time.setLength(0);
+			time.append(i.endTimeHour);
+			time.append(":");
+			time.append(i.endTimeMinute);
+			occassion.put("End", time.toString());
+			occassion.put("Place", i.room);
+			occassion.put("Day", i.onDay.toString());
+			this.getWritableDatabase().insert("TimePlace", null, occassion);
+		}
 	}
 	
 	public void addTeacher(Teacher teacher)
