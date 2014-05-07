@@ -45,9 +45,17 @@ public class DataMiner {
 
 		// first <tr> skip
 		for (int i = 1; i + 8 < mainList.size() && i < 50; i += 9) {
-			Course c = new Course();
 			Subject s = new Subject();
-			c.subject = s; 
+			Course c = new Course();
+			String cNum = new String();
+			
+			// course id
+			s.code = stripHtml(mainList.get(i+2));
+			
+			// course name
+			s.name = stripHtml(mainList.get(i+3));
+			
+			db.addSubject(s);
 			
 			// link to details
 			String tmp = mainList.get(i+1).split("\"")[1];
@@ -73,12 +81,23 @@ public class DataMiner {
 					Occasion o = new Occasion();
 					Teacher t = new Teacher();
 
-					// class type
-					c.classType = stripHtml(detailList.get(j+1));
-					
 					// group number
 					tmp = stripHtml(detailList.get(j+2));
-					c.courseNumber = Integer.parseInt(tmp);
+					if (!tmp.equals(cNum)) {
+						if (c.subject != null) {
+							db.addCourse(c);
+						}
+						c.courseNumber = Integer.parseInt(tmp);
+						cNum = tmp;
+					
+						// class type
+						c.classType = stripHtml(detailList.get(j+1));
+						
+						c.subject = s;
+						c.teacher = null;
+						c.timetable.clear();
+					}
+					
 					
 					// day
 					tmp = stripHtml(detailList.get(j+4));
@@ -130,16 +149,15 @@ public class DataMiner {
 					// teacher email
 					t.email = stripHtml(detailList.get(j+12));
 					
-					// TODO kezdeni valamit occasionnel és teacherrel
+					c.timetable.add(o);
+					
+					if (c.teacher != null) {
+						db.addTeacher(t);
+						c.teacher = t;
+					}
 				}
 			}
 
-			// course id
-			s.code = stripHtml(mainList.get(i+2));
-			
-			// course name
-			s.name = stripHtml(mainList.get(i+3));
-			
 			// link to rest of details
 			tmp = mainList.get(i+8).split("\"")[1];
 			
