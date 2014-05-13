@@ -1,5 +1,10 @@
 package com.eltecalendar;
 
-public class TimeTable {
+import java.util.ArrayList;
+import java.util.List;
 
+public class TimeTable {
+	int Id;
+	String Name;
+	List<Course> courses = new ArrayList<Course>();
 }

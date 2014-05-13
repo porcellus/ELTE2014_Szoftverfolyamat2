@@ -73,6 +73,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		course.courseNumber = row.getInt(2);
 		course.Id = row.getInt(0);
 		
+		Cursor timeRows = this.getReadableDatabase().rawQuery("select * from TimePlace where CourseId = ?", new String[] {Integer.toString(course.Id)});
+		while (timeRows.moveToNext())
+		{
+			Occasion o = new Occasion();
+			String begin = timeRows.getString(2);
+			String hour = begin.substring(0, begin.indexOf(":"));
+			String minute = begin.substring(begin.indexOf(":") + 1, begin.length());
+			o.startTimeHour = Integer.parseInt(hour);
+			o.startTimeMinute = Integer.parseInt(minute);
+			String end = timeRows.getString(3);
+			hour = end.substring(0, end.indexOf(":"));
+			minute = end.substring(end.indexOf(":") + 1, end.length());
+			o.endTimeHour = Integer.parseInt(hour);
+			o.endTimeMinute = Integer.parseInt(minute);
+			o.room = timeRows.getString(4);
+			o.onDay = Occasion.Day.valueOf(timeRows.getString(5));
+			course.timetable.add(o);
+		}
+		
 		return course;
 	}
 	
@@ -115,11 +134,69 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			Cursor timeRows = this.getReadableDatabase().rawQuery("select * from TimePlace where CourseId = ?", new String[] {Integer.toString(course.Id)});
 			while (timeRows.moveToNext())
 			{
-				
+				Occasion o = new Occasion();
+				String begin = timeRows.getString(2);
+				String hour = begin.substring(0, begin.indexOf(":"));
+				String minute = begin.substring(begin.indexOf(":") + 1, begin.length());
+				o.startTimeHour = Integer.parseInt(hour);
+				o.startTimeMinute = Integer.parseInt(minute);
+				String end = timeRows.getString(3);
+				hour = end.substring(0, end.indexOf(":"));
+				minute = end.substring(end.indexOf(":") + 1, end.length());
+				o.endTimeHour = Integer.parseInt(hour);
+				o.endTimeMinute = Integer.parseInt(minute);
+				o.room = timeRows.getString(4);
+				o.onDay = Occasion.Day.valueOf(timeRows.getString(5));
+				course.timetable.add(o);
 			}
 		}
 		
 		return courses;
+	}
+	
+	public Subject getSubjectById(int Id)
+	{
+		Cursor rows = this.getReadableDatabase().query("Subjects", null, "Id=?", new String[] {Integer.toString(Id)}, null, null, null);
+		Subject subject = new Subject();
+		rows.moveToNext();
+		subject.name = rows.getString(1);
+		subject.code = rows.getString(2);
+		subject.Id = rows.getInt(0);
+		
+		return subject;
+	}
+	
+	public Course getCourseById(int Id)
+	{
+		Cursor row = this.getReadableDatabase().query("Courses", null, "Id = ?", new String[] {Integer.toString(Id)}, null, null, null);
+		
+		row.moveToNext();
+		Course course = new Course();
+		course.subject = getSubjectById(row.getInt(1));
+		course.teacher = getTeacher(row.getInt(3));
+		course.courseNumber = row.getInt(2);
+		course.Id = row.getInt(0);
+		
+		Cursor timeRows = this.getReadableDatabase().rawQuery("select * from TimePlace where CourseId = ?", new String[] {Integer.toString(course.Id)});
+		while (timeRows.moveToNext())
+		{
+			Occasion o = new Occasion();
+			String begin = timeRows.getString(2);
+			String hour = begin.substring(0, begin.indexOf(":"));
+			String minute = begin.substring(begin.indexOf(":") + 1, begin.length());
+			o.startTimeHour = Integer.parseInt(hour);
+			o.startTimeMinute = Integer.parseInt(minute);
+			String end = timeRows.getString(3);
+			hour = end.substring(0, end.indexOf(":"));
+			minute = end.substring(end.indexOf(":") + 1, end.length());
+			o.endTimeHour = Integer.parseInt(hour);
+			o.endTimeMinute = Integer.parseInt(minute);
+			o.room = timeRows.getString(4);
+			o.onDay = Occasion.Day.valueOf(timeRows.getString(5));
+			course.timetable.add(o);
+		}
+		
+		return course;
 	}
 	
 	public Teacher getTeacher(int Id)
@@ -179,5 +256,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		values.put("Name", teacher.name);
 		
 		teacher.Id = (int)this.getWritableDatabase().insert("Teachers", null, values);
+	}
+	
+	public void CreateCalendar(TimeTable t)
+	{
+		ContentValues values = new ContentValues();
+		values.put("Name", t.Name);
+		t.Id = (int) this.getWritableDatabase().insert("Calendar", null, values);
+	}
+	
+	public void addCourseToCalendar(TimeTable Calendar, Course course)
+	{
+		ContentValues values = new ContentValues();
+		values.put("CourseId", course.Id);
+		values.put("CalendarId", Calendar.Id);
+		Calendar.courses.add(course);
+		this.getWritableDatabase().insert("Schedule", null, values);
+	}
+	
+	public TimeTable getCalendar(int Id)
+	{
+		TimeTable t = new TimeTable();
+		Cursor rows = this.getReadableDatabase().rawQuery("select CourseId from Schedule where CalendarId=?", new String[] {Integer.toString(Id)});
+		while (rows.moveToNext())
+		{
+			Course c = this.getCourseById(rows.getInt(0));
+			t.courses.add(c);
+		}
+		return t;
 	}
 }
