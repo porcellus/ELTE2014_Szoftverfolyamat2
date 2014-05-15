@@ -5,10 +5,14 @@ import android.app.Activity;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
-
+	private TimeTable _timeTable;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if(savedInstanceState != null && savedInstanceState.containsKey("timeTable"))
+			_timeTable = (TimeTable) savedInstanceState.get("timeTable");
+		else _timeTable = new TimeTable(this);
 		setContentView(R.layout.activity_main);
 	}
 
@@ -19,4 +23,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	public TimeTable getTimeTable() {
+		return _timeTable;
+	}
 }

@@ -3,7 +3,17 @@ package com.eltecalendar;
 public class Occasion {
 	
 	public enum Day {
-		MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY;
+		MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY{
+	        @Override
+	        public Day next() {
+	            return null; // see below for options for this line
+	        };
+		};
+
+	    public Day next() {
+	        // No bounds checking required here, because the last instance overrides
+	        return values()[ordinal() + 1];
+	    }
 	}
 	
 	public Day onDay;
