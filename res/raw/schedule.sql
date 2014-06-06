@@ -62,6 +62,7 @@ CREATE TABLE TimePlace
 	Begin TEXT,
 	End TEXT,
 	Place TEXT,
+	Day TEXT,
 	CONSTRAINT PK_TimePlace PRIMARY KEY (Id),
 	CONSTRAINT FK_TimePlace_Courses FOREIGN KEY (CourseId)
 		REFERENCES Courses(Id) 
